@@ -1,0 +1,35 @@
+[{
+    "name": "List Containers",
+    "id": 100,
+    "actions": [{
+
+        "name": "Run a container",
+        "key": "run",
+        "id": 101
+    },
+    {
+
+        "name": "Stop a container",
+        "key": "stop",
+        "id": 102
+    },
+    {
+        "name": "Remove all stopped/exited containers",
+        "key": "remove",
+        "id": 103
+    }
+]
+},
+{
+    "name": "Run a python program",
+    "id": 200
+},
+{
+    "name": "Run a pre-defined scenario",
+    "id": 300
+},
+{
+    "name": "Exit",
+    "id": 400
+}
+]
