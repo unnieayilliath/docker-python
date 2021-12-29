@@ -47,8 +47,6 @@ class DockerController:
         else:
             # add the page to the breadcrumb
             ConsoleHelper.append_breadcrumb(selectedAction["name"])
-            # clear previous page
-            ConsoleHelper.clear()
         try:
             match selectedAction["key"]:
                 case "run":
@@ -68,11 +66,9 @@ class DockerController:
     # ------------------------------------------------------------------------------------------------------------
     # This method runs a container
     def __run_container(self):
-        ConsoleHelper.clear()
-        self.__list_local_images()
         image=ConsoleHelper.get_alphanumeric_input("Please enter the image name (Local or from docker hub):\t")
-        print(f"Running container using {image} image....")
-        container=self.client.containers.run(image,detach=True)
+        print(f"Running container using {image} image in the background....")
+        container=self.client.containers.run(image=image,detach=True)
         print(container.logs())
     # ------------------------------------------------------------------------------------------------------------
     # This method shows local images
@@ -90,5 +86,22 @@ class DockerController:
     def __stop_container(self):
         identifier=ConsoleHelper.get_alphanumeric_input("Please enter the container name or id:\t")
         container=self.client.containers.get(identifier)
-        conatiner.stop()
+        container.stop()
+        ConsoleHelper.print_success("The container is stopped!")
+    # ------------------------------------------------------------------------------------------------------------
+    # This method removes containers which are in "exited" status
+    def __remove_container(self):
+        confirm=ConsoleHelper.get_yes_no_input("Are you sure to remove all containers? (Y/N):\t")
+        if confirm:
+            index=0
+            for container in self.client.containers.list(filters={"status":"exited"}):
+                index+=1
+                container.remove(force=True,v=True)
+            if index==0:
+                ConsoleHelper.print_warning("There are no exited containers to be removed!")
+            else:
+                ConsoleHelper.print_success(f"{index} container(s) are removed!")
+        else:
+            ConsoleHelper.print_warning("The container removal aborted!")
+
       
