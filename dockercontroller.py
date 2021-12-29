@@ -1,4 +1,5 @@
 #import docker
+from os import path
 from consolehelper import ConsoleHelper
 from globals import Globals
 import datetime
@@ -82,7 +83,7 @@ class DockerController:
          if index==0:
              ConsoleHelper.print_warning("No local images found!\n")
     # ------------------------------------------------------------------------------------------------------------
-    # This method shows local images
+    # This method stops a container
     def __stop_container(self):
         identifier=ConsoleHelper.get_alphanumeric_input("Please enter the container name or id:\t")
         container=self.client.containers.get(identifier)
@@ -103,5 +104,37 @@ class DockerController:
                 ConsoleHelper.print_success(f"{index} container(s) are removed!")
         else:
             ConsoleHelper.print_warning("The container removal aborted!")
+    # ------------------------------------------------------------------------------------------------------------
+    # This method allows user to create a docker image
+    def create_image(self):
+        ConsoleHelper.clear()
+        imageName=ConsoleHelper.get_alphanumeric_input("Please enter a image name:\t")
+        filePath=ConsoleHelper.get_alphanumeric_input("Please enter python file path:\t")
+        pythonVersion=ConsoleHelper.get_number_input(1,2,"Which version of python is used\n 1. v2.7 \t 2. v3.10\n")
+        if pythonVersion==1:
+            pythonVersion="python2"
+        else:
+            pythonVersion="python"
+        contents=f"FROM ubuntu\n"
+        contents+=f"RUN apt-get update\n"
+        contents+=f"RUN apt-get install -y {pythonVersion}\n"
+        contents+=f"ADD {filePath} /home/{filePath}\n"
+        contents+=f'CMD ["/home/{filePath}"]\n'
+        contents+=f'ENTRYPOINT ["{pythonVersion}"]\n'
+        self.__create_dockerfile(contents)
+        ConsoleHelper.print_success("Dockerfile is created!\n")
+        print("Creating docker image...\n")
+        self.client.images.build(path="./",tag=imageName)
+        ConsoleHelper.print_success(f"A python app image is created with name {imageName}!\n")
+        print("Running a container using the image...")
+        container=self.client.containers.run(image=imageName,detach=True)
+        print(container.logs())
+        input("Press any key to continue..")
 
+    # ------------------------------------------------------------------------------------------------------------
+    # This method creates a dockerfile in the current directory
+    def __create_dockerfile(self,contents):
+        f = open("Dockerfile", "w")
+        f.write(contents)
+        f.close()
       

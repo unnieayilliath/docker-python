@@ -25,6 +25,8 @@ class Main():
         match selectedNav["id"]:
             case 100:
                 self._dockerCtrl.load_screen()
+            case 200:
+                self._dockerCtrl.create_image()
             case 400:
                 # exit the application
                 confirm = ConsoleHelper.get_yes_no_input(
