@@ -128,8 +128,19 @@ class DockerController:
         ConsoleHelper.print_success(f"A python app image is created with name {imageName}!\n")
         print("Running a container using the image...")
         container=self.client.containers.run(image=imageName,detach=True)
-        print(container.logs())
+        stream = container.logs(stream =True)
+        self.__print_stream(stream)
         input("Press any key to continue..")
+    # ------------------------------------------------------------------------------------------------------------
+    # This method prints the byte stream passed to it
+    def __print_stream(self, stream):
+        print(f'============= Python execution log starts ============')
+        try:
+            while True:
+                line = next(stream).decode("utf-8")
+                print(line)
+        except StopIteration:
+            print(f'============= Python execution log ends ============')
 
     # ------------------------------------------------------------------------------------------------------------
     # This method creates a dockerfile in the current directory
