@@ -2,7 +2,7 @@
 from consolehelper import ConsoleHelper
 from globals import Globals
 import datetime
-
+import docker
 from navigationcontroller import NavigationController
 
 class DockerController:
@@ -10,7 +10,7 @@ class DockerController:
     # A class for controlling interactions with the docker sdk
     def __init__(self):
         # initialise a ec2Resource
-        self.client = "docker.from_env()"
+        self.client = docker.from_env()
         # initialise cloud watch controller
     # -------------------------------------------------------------------------------------------------
     # This protected method returns all instances
@@ -19,8 +19,10 @@ class DockerController:
         while repeat:
             ConsoleHelper.clear()
             self.__print__header()
-            #for container in self.client.containers.list():
-            #    print(container.id)
+            index=0
+            for container in self.client.containers.list(all=True):
+              index+=1
+              self.__print_container(index,container)
             repeat = self.__perform_action()
     # --------------------------------------------------------------------------------------------------
     # This is the main method for this controller
@@ -28,12 +30,12 @@ class DockerController:
         self.__list_containers()
     # -------------------------------------------------------------------------------------------------
     # This method prints container instance
-    def __print_continer(self, index,id, name, status, image):
-            print(f"{index}. {id}\t{name}\t{status}\t{image}\n")
+    def __print_container(self, index,container):
+            print(f"{index}. {container.short_id}\t{container.status}\t{container.image}\t{container.name}\n")
     # ------------------------------------------------------------------------------------------------------------
     # This method prints header row for containers
     def __print__header(self):
-        print("\033[4m\tID\tName\tStatus\tImage\033[0m\n")    
+        print("\033[4m\tID\tStatus\tImage\t\t\t\tName\033[0m\n")    
      # ------------------------------------------------------------------------------------------------
     # This method allows user to select an action
     def __perform_action(self):
@@ -63,3 +65,30 @@ class DockerController:
             # remove the last added item from breadcrumb
             ConsoleHelper.pop_breadcrumb()
         return repeat
+    # ------------------------------------------------------------------------------------------------------------
+    # This method runs a container
+    def __run_container(self):
+        ConsoleHelper.clear()
+        self.__list_local_images()
+        image=ConsoleHelper.get_alphanumeric_input("Please enter the image name (Local or from docker hub):\t")
+        print(f"Running container using {image} image....")
+        container=self.client.containers.run(image,detach=True)
+        print(container.logs())
+    # ------------------------------------------------------------------------------------------------------------
+    # This method shows local images
+    def __list_local_images(self):
+         print("Local Images")
+         print("\033[4m\tId\t\tTag\033[0m\n")
+         index=0
+         for image in self.client.images.list():
+             index+=1
+             print(f"{index}. {image.short_id.replace('sha256:','')}\t{image.tags}\n")
+         if index==0:
+             ConsoleHelper.print_warning("No local images found!\n")
+    # ------------------------------------------------------------------------------------------------------------
+    # This method shows local images
+    def __stop_container(self):
+        identifier=ConsoleHelper.get_alphanumeric_input("Please enter the container name or id:\t")
+        container=self.client.containers.get(identifier)
+        conatiner.stop()
+      
