@@ -108,7 +108,7 @@ class DockerController:
     # This method allows user to create a docker image
     def create_image(self):
         ConsoleHelper.clear()
-        imageName=ConsoleHelper.get_alphanumeric_input("Please enter a image name:\t")
+        imageName=ConsoleHelper.get_alphanumeric_input("Please enter the name for new python app image:\t")
         filePath=ConsoleHelper.get_alphanumeric_input("Please enter python file path:\t")
         pythonVersion=ConsoleHelper.get_number_input(1,2,"Which version of python is used\n 1. v2.7 \t 2. v3.10\n")
         if pythonVersion==1:

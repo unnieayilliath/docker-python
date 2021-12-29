@@ -21,7 +21,7 @@
 ]
 },
 {
-    "name": "Run a python program",
+    "name": "Run python app as container",
     "id": 200
 },
 {
