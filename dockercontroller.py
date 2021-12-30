@@ -136,6 +136,7 @@ class DockerController:
         print(f'============= Log starts ============')
         try:
             while True:
+                # read next line from stream
                 line = next(stream).decode("utf-8")
                 print(line)
         except StopIteration:
