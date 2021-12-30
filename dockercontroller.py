@@ -29,7 +29,10 @@ class DockerController:
     # -------------------------------------------------------------------------------------------------
     # This method prints container instance
     def __print_container(self, index,container):
-            print(f"{index}. {container.short_id}\t{container.status}\t{container.image}\t{container.name}\n")
+            imageName="\t\t\t"
+            if len(container.image.tags)>=1:
+               imageName=f"{container.image.tags[0]}\t"
+            print(f"{index}. {container.short_id}\t{container.status}\t{imageName}\t{container.name}\n")
     # ------------------------------------------------------------------------------------------------------------
     # This method prints header row for containers
     def __print__header(self):
@@ -67,25 +70,24 @@ class DockerController:
         image=ConsoleHelper.get_alphanumeric_input("Please enter the image name (Local or from docker hub):\t")
         print(f"Running container using {image} image in the background....")
         container=self.client.containers.run(image=image,detach=True)
-        print(container.logs())
-    # ------------------------------------------------------------------------------------------------------------
-    # This method shows local images
-    def __list_local_images(self):
-         print("Local Images")
-         print("\033[4m\tId\t\tTag\033[0m\n")
-         index=0
-         for image in self.client.images.list():
-             index+=1
-             print(f"{index}. {image.short_id.replace('sha256:','')}\t{image.tags}\n")
-         if index==0:
-             ConsoleHelper.print_warning("No local images found!\n")
+        stream = container.logs(stream =True)
+        self.__print_stream(stream)
+        ConsoleHelper.print_success("Container run initiated in the background.")
     # ------------------------------------------------------------------------------------------------------------
     # This method stops a container
     def __stop_container(self):
-        identifier=ConsoleHelper.get_alphanumeric_input("Please enter the container name or id:\t")
-        container=self.client.containers.get(identifier)
-        container.stop()
-        ConsoleHelper.print_success("The container is stopped!")
+        loop=True
+        while loop:
+            identifier=ConsoleHelper.get_alphanumeric_input("Please enter the container name or id (Press 0 to cancel the operation):\t")
+            if identifier=="0":
+                loop=False
+            else:
+                container=self.client.containers.get(identifier)
+                if container.status.lower()=="exited" or container.status.lower()=="created":
+                    ConsoleHelper.print_warning("This container is not running currently!")
+                else:
+                    container.stop()
+                    ConsoleHelper.print_success("The container is stopped!")
     # ------------------------------------------------------------------------------------------------------------
     # This method removes containers which are in "exited" status
     def __remove_container(self):
@@ -131,13 +133,13 @@ class DockerController:
     # ------------------------------------------------------------------------------------------------------------
     # This method prints the byte stream passed to it
     def __print_stream(self, stream):
-        print(f'============= Python execution log starts ============')
+        print(f'============= Log starts ============')
         try:
             while True:
                 line = next(stream).decode("utf-8")
                 print(line)
         except StopIteration:
-            print(f'============= Python execution log ends ============')
+            print(f'============= Log ends ============')
 
     # ------------------------------------------------------------------------------------------------------------
     # This method creates a dockerfile in the current directory
@@ -146,8 +148,8 @@ class DockerController:
         f.write(contents)
         f.close()
     # ------------------------------------------------------------------------------------------------------------
-    # This method provisions container group for wordsmith docker app
-    def provision_docker_compose_app(self):
+    # This method provisions container group for sample wordsmith docker app https://github.com/dockersamples/k8s-wordsmith-demo 
+    def provision_docker_compose_app(self): 
         ConsoleHelper.clear()
         print("Provisioning docker sample 'Wordsmith' app\n")
         # run the docker compose in background

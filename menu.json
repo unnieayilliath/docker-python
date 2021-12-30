@@ -1,5 +1,5 @@
 [{
-    "name": "List Containers",
+    "name": "Manage Containers",
     "id": 100,
     "actions": [{
 
@@ -14,7 +14,7 @@
         "id": 102
     },
     {
-        "name": "Remove all stopped/exited containers",
+        "name": "Remove all exited containers",
         "key": "remove",
         "id": 103
     }
