@@ -1,20 +1,17 @@
 #import docker
-from os import path
 from consolehelper import ConsoleHelper
-from globals import Globals
-import datetime
 import docker
 from navigationcontroller import NavigationController
-
+import os
 class DockerController:
     # -------------------------------------------------------------------------------------------------
     # A class for controlling interactions with the docker sdk
     def __init__(self):
-        # initialise a ec2Resource
+        # initialise a docker client
         self.client = docker.from_env()
-        # initialise cloud watch controller
+
     # -------------------------------------------------------------------------------------------------
-    # This protected method returns all instances
+    # This protected method returns all containers
     def __list_containers(self):
         repeat = True
         while repeat:
@@ -148,4 +145,19 @@ class DockerController:
         f = open("Dockerfile", "w")
         f.write(contents)
         f.close()
-      
+    # ------------------------------------------------------------------------------------------------------------
+    # This method provisions container group for wordsmith docker app
+    def provision_docker_compose_app(self):
+        ConsoleHelper.clear()
+        print("Provisioning docker sample 'Wordsmith' app\n")
+        # run the docker compose in background
+        os.system("docker-compose up -d")
+        ConsoleHelper.print_success("Provisioning is completed. Please visit http://localhost:8080/ to see the app working.")
+        confirm=ConsoleHelper.get_yes_no_input("Do you want to shutdown the wordsmith app? (Y/N)")
+        if confirm:
+            print("Shutting down docker sample 'Wordsmith' app\n")
+            os.system("docker-compose down")
+            ConsoleHelper.print_success("App is shutdown.")
+        input("Press any key to continue..")
+        
+
